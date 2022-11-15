@@ -19,6 +19,22 @@ MNT_PATH = "/mnt"
 # can be read only (for configmap mount)
 CONFIG_PATH = "/etc/config"
 
+modelItemNameMap = {
+    "Abs": "NODE_TOTAL",
+    "AbsComponent": "NODE_COMPOENTS",
+    "Dyn": "POD_TOTAL",
+    "DynComponent": "POD_COMPONENTS"
+}
+
+modelTypeNameMap = {
+    "Power": "POWER",
+    "ModelWeight": "MODEL_WEIGHT"
+}
+
+modelEnvMap = {"{}{}".format(modelItemKey, modelTypeKey): "{}_{}".format(modelItemValue, modelTypeValue) for modelItemKey, modelItemValue in modelItemNameMap.items() for modelTypeKey, modelTypeValue in modelTypeNameMap.items() }
+estimatorKeyMap = {"{}Power".format(modelItemKey): "{}_ESTIMATOR".format(modelItemNameMap[modelItemKey]) for modelItemKey in modelItemNameMap.keys()}
+initUrlKeyMap = {"{}Power".format(modelItemKey): "{}_INIT_URL".format(modelItemNameMap[modelItemKey]) for modelItemKey in modelItemNameMap.keys()}
+
 def getConfig(key, default):
     # check configmap path
     file = os.path.join(CONFIG_PATH, key)
@@ -27,6 +43,13 @@ def getConfig(key, default):
             return f.read()
     # check env
     return os.getenv(key, default)
+
+def getInitModel(output_type):
+    if output_type in estimatorKeyMap:
+        enabled = getConfig(estimatorKeyMap[output_type], "false").lower() == "true"
+        if enabled:
+            return getConfig(initUrlKeyMap[output_type], "")
+    return ""
 
 def getPath(subpath):
     path = os.path.join(MNT_PATH, subpath)

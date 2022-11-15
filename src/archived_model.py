@@ -6,7 +6,7 @@ util_path = os.path.join(os.path.dirname(__file__), 'model')
 sys.path.append(util_path)
 
 from model_server_connector import unpack, ModelOutputType
-from util.config import getConfig
+from util.config import getInitModel
 from model.common import load_metadata
 
 failed_list = []
@@ -64,8 +64,8 @@ def get_achived_model(power_request):
     if output_type_name in failed_list:
         return None
     output_type = ModelOutputType[power_request.output_type]
-    url = getConfig(output_type_name, None)
-    if url is None:
+    url = getInitModel(output_type_name)
+    if url == "":
         return None
     response = requests.get(url)
     if response.status_code != 200:
