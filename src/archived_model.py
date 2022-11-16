@@ -57,6 +57,9 @@ def is_valid_model(metrics, metadata, filters):
                 return False
     return True
 
+def reset_failed_list():
+    global failed_list
+    failed_list = []
 
 def get_achived_model(power_request):  
     global failed_list
@@ -66,7 +69,9 @@ def get_achived_model(power_request):
     output_type = ModelOutputType[power_request.output_type]
     url = getInitModel(output_type_name)
     if url == "":
+        print("No URL set for ", output_type_name)
         return None
+    print("Try getting archieved model from URL: {} for {}".format(url, output_type_name))
     response = requests.get(url)
     if response.status_code != 200:
         return None

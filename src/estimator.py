@@ -35,6 +35,7 @@ import signal
 from model_server_connector import ModelOutputType, is_weight_output, make_request, get_output_path
 from archived_model import get_achived_model
 from model.load import load_model
+from util.config import set_env_from_model_config
 
 loaded_model = dict()
 
@@ -117,6 +118,7 @@ def sig_handler(signum, frame) -> None:
 import argparse
 
 if __name__ == '__main__':
+    set_env_from_model_config()
     clean_socket()
     signal.signal(signal.SIGTERM, sig_handler)
     try:

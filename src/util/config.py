@@ -49,6 +49,8 @@ def getInitModel(output_type):
         enabled = getConfig(estimatorKeyMap[output_type], "false").lower() == "true"
         if enabled:
             return getConfig(initUrlKeyMap[output_type], "")
+        else:
+            print("{} is not enaled".format(output_type))
     return ""
 
 def getPath(subpath):
@@ -65,3 +67,13 @@ if not os.path.exists(MNT_PATH) or not os.access(MNT_PATH, os.W_OK):
 print("mount path: ", MNT_PATH)
 
 CONFIG_PATH = getConfig('CONFIG_PATH', CONFIG_PATH)
+
+def set_env_from_model_config():
+    model_config = getConfig('MODEL_CONFIG', "")
+    if model_config != "":
+        lines = model_config.splitlines()
+        for line in lines:
+            splits = line.split('=')
+            if len(splits) > 1:
+                os.environ[splits[0]] = splits[1]
+                print("set {} to {}.".format(splits[0], splits[1]))

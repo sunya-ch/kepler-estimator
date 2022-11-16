@@ -17,8 +17,8 @@ os.environ['MODEL_SERVER_URL'] = 'localhost'
 
 from estimator import handle_request, get_output_path, loaded_model, PowerRequest
 from model_server_connector import ModelOutputType, list_all_models
-from archived_model import get_achived_model
-from util.config import estimatorKeyMap, initUrlKeyMap
+from archived_model import get_achived_model, reset_failed_list
+from util.config import estimatorKeyMap, initUrlKeyMap, set_env_from_model_config
 
 import json
 
@@ -120,3 +120,15 @@ if __name__ == '__main__':
         power_request = json.loads(data, object_hook = lambda d : PowerRequest(**d))
         output_path = get_achived_model(power_request)
         assert output_path is None, "model should be invalid\n {}".format(output_path)
+        os.environ['MODEL_CONFIG'] = "POD_COMPONENTS_ESTIMATOR=true\nPOD_COMPONENTS_INIT_URL=https://raw.githubusercontent.com/sustainable-computing-io/kepler-model-server/main/tests/test_models/DynComponentPower/CgroupOnly/ScikitMixed.zip\n"
+        set_env_from_model_config()
+        reset_failed_list()
+        if output_type_name in loaded_model:
+            del loaded_model[output_type_name]
+        output_path = get_output_path(output_type)
+        if os.path.exists(output_path):
+            shutil.rmtree(output_path)
+        request_json = generate_request(None, n=10, metrics=FeatureGroups[FeatureGroup.CgroupOnly], output_type=output_type_name)
+        data = json.dumps(request_json)
+        output = handle_request(data)
+        assert len(output['powers']) > 0, "cannot get power {}\n {}".format(output['msg'], request_json)
