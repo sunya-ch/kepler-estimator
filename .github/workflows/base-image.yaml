@@ -1,11 +1,10 @@
-name: Build-push estimator image
+name: Build-push base image
 
 on:
   push:
     paths:
-      - .github/workflows/**
-      - src
-      - Dockerfile
+      - Dockerfile.base
+      - requirements.txt
 
 jobs:
   build:
@@ -16,7 +15,7 @@ jobs:
     - uses: actions/checkout@v2
       
     - name: build image
-      run: docker build -t quay.io/sustainable_computing_io/kepler_estimator:latest .
+      run: docker build -t quay.io/sustainable_computing_io/kepler-estimator-base:latest . -f Dockerfile.base
       
     - name: Login to Quay
       if: ${{ github.repository_owner == 'sustainable-computing-io' }}
@@ -28,7 +27,7 @@ jobs:
 
     - name: push to quay
       if: ${{ github.repository_owner == 'sustainable-computing-io' }}
-      run: docker push quay.io/sustainable_computing_io/kepler_estimator:latest
+      run: docker push quay.io/sustainable_computing_io/kepler-estimator-base:latest
 
     - name: Login to ghcr
       if: ${{ github.repository_owner != 'sustainable-computing-io' }}
@@ -40,6 +39,6 @@ jobs:
 
     - name: push to ghcr
       run: |
-        docker tag quay.io/sustainable_computing_io/kepler_estimator:latest ghcr.io/${{ github.repository_owner }}/kepler_estimator:latest \
-        && docker push ghcr.io/${{ github.repository_owner }}/kepler_estimator:latest
+        docker tag quay.io/sustainable_computing_io/kepler-estimator-base:latest ghcr.io/${{ github.repository_owner }}/kepler-estimator-base:latest \
+        && docker push ghcr.io/${{ github.repository_owner }}/kepler-estimator-base:latest
 
